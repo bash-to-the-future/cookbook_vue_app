@@ -1,21 +1,55 @@
 <template>
   <div class="home">
+
     <h1>{{ message }}</h1>
     <h1>New Recipe Form</h1>
-    <div>
+    <div class="new-form">
       Title: <input type="text" v-model="newRecipeTitle">
       PrepTime: <input type="text" v-model="newRecipePrepTime">
       Ingredients: <input type="text" v-model="newRecipeIngredients">
       Directions: <input type="text" v-model="newRecipeDirections">
       ImageUrl: <input type="text" v-model="newRecipeImageUrl">
       <button v-on:click="createRecipe()">Submit Recipe</button>
-    </div>
+    </div> <!-- end of .new-form -->
+
+    <h1>All Recipes</h1>
+
     <div v-for="recipe in recipes">
+      <img v-on:click="showRecipe(recipe)" v-bind:src="recipe.image_url" v-bind:alt="recipe.title">
       <h2>{{ recipe.title }}</h2>
-      <p>Ingredients: {{ recipe.ingredients }}</p>
-      <p>Directions: {{ recipe.directions }}</p>
-      <img v-bind:src="recipe.image_url" v-bind:alt="recipe.title">
+      <div class="show-page" v-if="recipe === currentRecipe">
+        <h4>Prep Time: {{ recipe.formatted.prep_time }}</h4>
+        <p>Ingredients: {{ recipe.ingredients }}</p>
+        <p>Directions: {{ recipe.directions }}</p>
+
+        <div class="edit-form">
+          <h4>Edit Recipe</h4>
+
+          <div>
+            Title: <input type="text" v-model="recipe.title">
+          </div>
+
+          <div>
+            Prep Time: <input type="text" v-model="recipe.prep_time">
+          </div>
+
+          <div>
+            Ingredients: <input type="text" v-model="recipe.ingredients">
+          </div>
+
+          <div>
+            Directions: <input type="text" v-model="recipe.directions">
+          </div>
+
+          <div>
+            Image URL: <input type="text" v-model="recipe.image_url">
+          </div>
+
+          <button v-on:click="updateRecipe(recipe)">Update</button>
+        </div> <!-- end of .edit-form -->
+      </div> <!-- end of .show-page --> 
     </div>
+
   </div>
 </template>
 
@@ -30,6 +64,7 @@ import axios from "axios";
 export default {
   data: function() {
     return {
+      currentRecipe: {},
       message: "Welcome to Vue.js!",
       recipes: [],
       newRecipeTitle: "",
@@ -65,6 +100,32 @@ export default {
           this.recipes.push(response.data);
         }).catch(error => {
           console.log(error.response);
+        });
+    },
+    showRecipe: function(inputRecipe) {
+      if (this.currentRecipe !== inputRecipe) {
+        this.currentRecipe = inputRecipe;
+      } else {
+        this.currentRecipe = {};
+      }
+
+      // this.currentRecipe = this.currentRecipe !== inputRecipe ? inputRecipe : {}; // one line version
+    },
+    updateRecipe: function(inputRecipe) {
+      var clientParams = {
+        title: inputRecipe.title,
+        prep_time: inputRecipe.prep_time,
+        directions: inputRecipe.directions,
+        ingredients: inputRecipe.ingredients,
+        image_url: inputRecipe.image_url
+      };
+
+      axios
+        .patch("/api/recipes/" + inputRecipe.id, clientParams)
+        .then(response => {
+          console.log("Success", response.data);
+        }).catch(error => {
+          console.log(error.response.data);
         });
     }
   }
