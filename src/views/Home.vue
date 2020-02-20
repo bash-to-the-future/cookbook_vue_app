@@ -4,7 +4,6 @@
     <h1>New Recipe Form</h1>
     <div>
       Title: <input type="text" v-model="newRecipeTitle">
-      Chef: <input type="text" v-model="newRecipeChef">
       PrepTime: <input type="text" v-model="newRecipePrepTime">
       Ingredients: <input type="text" v-model="newRecipeIngredients">
       Directions: <input type="text" v-model="newRecipeDirections">
@@ -41,7 +40,7 @@ export default {
       newRecipeImageUrl: "",
     };
   },
-  created: function() {            // function(response)
+  created: function() {
     axios.get("/api/recipes").then(response => {
       this.recipes = response.data;
     });
@@ -59,11 +58,14 @@ export default {
         image_url: this.newRecipeImageUrl
       }
 
-      axios.post("/api/recipes", params).then(response => {
-        // console.log(response.data);
-        this.recipes.push(response.data);
-      }).catch(error => console.log(error.response));
-
+      axios
+        .post("/api/recipes", params)
+        .then(response => {
+          // console.log(response.data);
+          this.recipes.push(response.data);
+        }).catch(error => {
+          console.log(error.response);
+        });
     }
   }
 };
